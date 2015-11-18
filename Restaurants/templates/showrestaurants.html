@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Restaurant Network</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel='shortcut icon' type='image/x-icon' href='{{ url_for('static', filename='favicon.ico') }}' />
+  <link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Raleway'>
+  <link rel='stylesheet' type='text/css' href="{{ url_for('static', filename='styles.css') }}">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js" async></script>
+</head>
+
+<body>
+	<header class="header">
+    <div class="header__inner">
+      <a href="{{ url_for('showRestaurants') }}"><img class="header__logo" src="{{ url_for('static', filename='logo.png') }}"></a>
+      <div class="header__titles">
+      	<h1 class="header__title">Restaurant Network</h1>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="restaurant">
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+  {% for message in messages %}
+      <h3 class="restaurant__text restaurant__delete">{{message}}</h3>
+  {% endfor %}
+{% endif %}
+{% endwith %}
+      <h3 class="restaurant__text"><a href="{{ url_for('newRestaurant') }}">Create new restaurant</a></h3>
+{% for restaurant in restaurants %}	      
+      <div class="restaurant__one">
+        <div class="restaurant__image"></div>
+        <h3 class="restaurant__name"><a href="{{ url_for('showMenu', restaurant_id=restaurant.id) }}">{{ restaurant.name }}</a></h3>
+        <div class="restaurant__options">
+          <div class="restaurant__opt"><a class="restaurant__grey" href="{{ url_for('editRestaurant', restaurant_id = restaurant.id) }}">EDIT</a></div>
+          <div class="restaurant__opt"><a class="restaurant__delete" href="{{ url_for('deleteRestaurant', restaurant_id = restaurant.id) }}">DELETE</a></div>
+        </div>
+      </div>
+{% endfor %}
+		</section>
+<form id="form-container" method="get">
+    <section class="streetview">
+      <label for="streetview__city">City:</label>
+      <input class="streetview__inline" id="streetview__city" type='text' size='20' placeholder='where you are'>
+      <label class="streetview__inline" for="streetview__state">State:</label>
+      <input class="streetview__inline" id="streetview__state" type='text' size='20' placeholder='where you are'>
+      <button class="streetview__inline" id="submit-btn">LOOK FOR PLACE NEAR YOU</button>
+      <div id='streetview__image'></div>
+    </section>
+</form>
+	</main>
+
+<script>
+  function loadData() {
+
+    $( "button" ).click(function() {
+      $( "img" ).remove();
+    });
+
+    var cityString = $('#streetview__city').val();
+    var stateString = $('#streetview__state').val();
+    var address = cityString + ', ' + stateString;
+    var imageWidth = $('#streetview__image').width();
+    var imageHeight = 450
+    if (imageWidth < 640) {
+      imageHeight = Math.floor( imageWidth * 2 / 3 );
+    }
+
+    // load streetview
+    var streetviewUrl = 'http://maps.googleapis.com/maps/api/streetview?size=' + imageWidth.toString() + 'x' + imageHeight.toString() + '&location=' + address + '';
+    $('#streetview__image').append('<img src="' + streetviewUrl + '">');
+
+    return false;
+  };
+
+  $('#form-container').submit(loadData);
+
+</script>
+
+</body>
+
+</html>
